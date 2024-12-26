@@ -1,0 +1,140 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+ 
+<head> 
+    <meta charset="UTF-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+    <title>Card Flip</title> 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
+    <style> 
+        .card-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            flex-direction: row; 
+            flex-wrap: wrap; 
+            gap: 1em; 
+        } 
+ 
+        .card { 
+            width: 4em; 
+            height: 6em; 
+            border-radius: 0.2em; 
+            border: 1px solid rgba(0, 0, 0, 0.452); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 2em; 
+            position: relative; 
+            cursor: pointer; 
+        } 
+ 
+        .card .back { 
+            background-image: url("pattern.webp"); 
+            background-size: cover; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            border-radius: 0.2em; 
+            z-index: 2; 
+        } 
+ 
+        .card.matched { 
+            background-color: rgb(203, 255, 192); 
+        } 
+ 
+        .message 
+        { 
+            text-align: center; 
+            font-size: 1.5em; 
+            color:rgb(219, 107, 176); 
+text-transform: capitalize; 
+        } 
+    </style> 
+</head> 
+ 
+<body> 
+    <div class="card-container" id="cardContainer"></div> 
+    <script> 
+        $(document).ready(function () { 
+            const symbols = ['🧡', '🎀', '🍓', '🐾', '🌼', '🧡', '🎀', '🍓', '🐾', '🌼']; 
+            let clickCount = 0; 
+            function shuffle(arr) { 
+                for (let i = arr.length - 1; i > 0; i--) { 
+                    const j = Math.floor(Math.random() * (i + 1)); 
+                    [arr[i], arr[j]] = [arr[j], arr[i]]; 
+                } 
+            } 
+            shuffle(symbols); 
+ 
+            const cardContainer = $("#cardContainer"); 
+            symbols.forEach(symbol => { 
+                const card = $(` 
+                    <div class="card"> 
+                        <div class="back"></div> 
+                        <span class="symbol">${symbol}</span> 
+                    </div> 
+                `); 
+                cardContainer.append(card); 
+            }); 
+ 
+            $(".symbol").hide(); 
+            let flippedCards = []; 
+            $(".card").click(function () { 
+                clickCount++; 
+                const back = $(this).find(".back"); 
+                const symbol = $(this).find(".symbol"); 
+ 
+                if (flippedCards.includes(this) || $(this).hasClass("matched")) return; 
+ 
+                back.fadeOut(0, function () { 
+                    symbol.fadeIn(0); 
+                }); 
+ 
+                flippedCards.push(this); 
+ 
+                if (flippedCards.length === 2) { 
+                    const [firstCard, secondCard] = flippedCards; 
+                    const firstSymbol = $(firstCard).find(".symbol").text(); 
+                    const secondSymbol = $(secondCard).find(".symbol").text(); 
+ 
+                    if (firstSymbol === secondSymbol) { 
+                        $(firstCard).addClass("matched"); 
+                        $(secondCard).addClass("matched"); 
+                        flippedCards = []; 
+                    } 
+                } 
+ 
+                if (flippedCards.length === 3) { 
+                    const [firstCard, secondCard] = flippedCards; 
+ 
+                    const firstSymbol = $(firstCard).find(".symbol").text(); 
+                    const secondSymbol = $(secondCard).find(".symbol").text(); 
+ 
+                    if (firstSymbol !== secondSymbol) { 
+                        $(firstCard).find(".symbol").fadeOut(0, function () { 
+                            $(firstCard).find(".back").fadeIn(0); 
+                        }); 
+                        $(secondCard).find(".symbol").fadeOut(0, function () { 
+                            $(secondCard).find(".back").fadeIn(0);
+}); 
+                    } 
+ 
+                    flippedCards = [this]; 
+                } 
+                if ($(".card.matched").length === symbols.length) { 
+                    $("#cardContainer").remove(); 
+                    const congratsMessage = $(` 
+                        <div class="message">Congrats! You've matched all the cards in ${clickCount} clicks!</div> 
+                    `); 
+                    $("body").append(congratsMessage); 
+                } 
+            }); 
+        }); 
+        
+    </script> 
+</body> 
+ 
+</html>
